@@ -1,5 +1,6 @@
+###### Project under development (June 10, 2022)
+
 # About the APP
-#
 ### How it works
 Based on satelite imagens colected from googlemaps API, regions are selected for content classification. The main execution is divided in two parts: local and large survey.
 
