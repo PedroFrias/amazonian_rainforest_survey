@@ -1,8 +1,9 @@
 # About the APP
 
 ### How it works
+Based on satelite imagens colected from googlemaps API, regions are selected for content classification. The main execution is divided in two parts: local and large survey.
 
-#### Local group
+#### Local survey
 Select a region with zoom N and convolves it select points of interest. Each of the square box in the image bellow are subregions selected for classification.
 
 ![img_2.png](https://github.com/PedroFrias/amazonian_rainforest_survey/blob/main/imgs/img_2.png)
