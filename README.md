@@ -5,8 +5,13 @@
 Based on satelite imagens colected from googlemaps API, regions are selected for content classification. The main execution is divided in two parts: local and large scale survey.
 
 #### Large scale survey
+Generate a heatmap where each square is as pseudo-probability - achieved by convolving and pooling(max) - of a inner region having been deforested. This is done mainly to reduce the number of operations preformed by methods futher down the line, since each region works as a separeted entity.
 
-#### Local survey
+![img_2.png](https://github.com/PedroFrias/amazonian_rainforest_survey/blob/main/imgs/img_2.png)
+
+A sample of the regions with with potential is selected for classificatio, and based on it's results the tiles adjacent can be either be activated or diactivated.
+
+#### Small scale survey
 Each one of those square are subdivide in N tiles, these tiles them feed a CNN model, and based on its position new areas are selected. This step is repeated untill no more areas nearby are found. Note that it may result in redundancy, which is avoided with a nearest neighboor algorithm.
 
 ![img_1.png](https://github.com/PedroFrias/amazonian_rainforest_survey/blob/main/imgs/img_1.png)
