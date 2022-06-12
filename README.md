@@ -16,9 +16,10 @@ Each one of those square are subdivide in N tiles, these tiles them feed though 
 
 <p align="center">
   <img src="https://github.com/PedroFrias/amazonian_rainforest_survey/blob/main/imgs/Figure_2.png">
-</p
+</p>
 
-# How to run this app
+# How to run
+ 
 First you'll need to get a [API key](https://console.cloud.google.com/apis). This service is paid, but you can get around 27000 imagens with the 200 credits provided by Google monthly. Obs.: these credits don't stack!
 
 (The following instructions apply to Posix/bash. Windows users should check [here](https://docs.python.org/3/library/venv.html).)
