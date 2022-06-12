@@ -1,4 +1,4 @@
-###### Project under development (June 10, 2022)
+###### Project under development (June 12, 2022)
 
 # About the APP
 ### How it works
