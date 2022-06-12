@@ -7,7 +7,7 @@ Based on satelite imagens colected from googlemaps API, regions are selected for
 #### Large scale survey
 Generate a heatmap where each square is as pseudo-probability - achieved by convolving and pooling(max) - of a inner region having been deforested. This is done mainly to reduce the number of operations preformed by methods futher down the line, since each region works as a separeted entity.
 
-![img_2.png](https://github.com/PedroFrias/amazonian_rainforest_survey/blob/main/imgs/img_2.png)
+![Figure_1.png](https://github.com/PedroFrias/amazonian_rainforest_survey/blob/main/imgs/Figure_1.png)
 
 A sample of the regions with with potential is selected for classificatio, and based on it's results the tiles adjacent can be either be activated or diactivated.
 
