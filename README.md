@@ -12,9 +12,11 @@ Generate a heatmap where each square is as pseudo-probability - achieved by conv
 A sample of the regions with with potential is selected for classificatio, and based on it's results the tiles adjacent can be either be activated or diactivated.
 
 #### Small scale survey
-Each one of those square are subdivide in N tiles, these tiles them feed a CNN model, and based on its position new areas are selected. This step is repeated untill no more areas nearby are found. Note that it may result in redundancy, which is avoided with a nearest neighboor algorithm.
+Each one of those square are subdivide in N tiles, these tiles them feed though CNN model, and based on its position new areas are selected. This step is repeated untill no more areas nearby are found. Note that it may result in redundancy, which is avoided with a nearest neighboor algorithm.
 
-![img_1.png](https://github.com/PedroFrias/amazonian_rainforest_survey/blob/main/imgs/img_1.png)
+<p align="center">
+  <img src="https://github.com/PedroFrias/amazonian_rainforest_survey/blob/main/imgs/Figure_2.png">
+</p
 
 ## How to run this app
 First you'll need to get a [API key](https://console.cloud.google.com/apis). This service is paid, but you can get around 27000 imagens with the 200 credits provided by Google monthly. Obs.: these credits don't stack!
