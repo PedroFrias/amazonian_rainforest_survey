@@ -36,3 +36,9 @@ Run the app:
 ```
 python main.py
 ```
+# Results
+A scatter plot with the location of the sites of deforestation found
+
+<p align="center">
+  <img src="https://github.com/PedroFrias/amazonian_rainforest_survey/blob/main/imgs/Figure_3.png">
+</p>
