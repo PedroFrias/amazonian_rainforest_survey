@@ -1,4 +1,4 @@
-###### Project under development (June 12, 2022)
+###### Project under development (June 13, 2022)
 
 # About the APP
 ### How it works
@@ -42,3 +42,7 @@ A scatter plot with the location of the sites of deforestation found
 <p align="center">
   <img src="https://github.com/PedroFrias/amazonian_rainforest_survey/blob/main/imgs/Figure_3.png">
 </p>
+
+lat, lon = -4.36391, -64.12855 Image take 06/13/2022 1:55 p.m.
+#
+Next update: refit the model to add precision.
