@@ -2,21 +2,33 @@
 
 # About the APP
 ### How it works
-Based on satelite imagens colected from googlemaps API, regions are selected for content classification. The main execution is divided in two parts: pre-evaluation and classification.
+Based on satelite imagens colected from googlemaps API, regions are selected for its content classification. The main execution is divided in four-ish step:
 
-#### Pre-evaluation
-Generate a heatmap where each square is as pseudo-probability - achieved by convolving and pooling(max) - of a inner region having been deforested. This is done mainly to reduce the number of operations preformed by methods futher down the line, since each region works as a separeted entity.
+1. Collecting data;
+2. Convolution;
+3. Clusttering;
+4. Classification;
+5. Propagation.
 
-![Figure_1.png](https://github.com/PedroFrias/amazonian_rainforest_survey/blob/main/imgs/Figure_1.png)
+Where steps number 2, 3 and 5 are used as performance enhancers, being steps 2 an 3 responsible to minimazing the amount of iterations necessary to achieve the goal, and step number 5 retro feeds 1, only and only if, the new __I__ have analytical sense to it.
 
-A sample of the regions with with potential is selected for classificatio, and based on it's results the tiles adjacent can be either be activated or diactivated.
+### 1. Collecting data:
+requests a image (I) centered ant lat/lon with googlemaps API
 
-#### Classification
-Each one of those square are subdivide in N tiles, these tiles them feed though CNN model, and based on its position new areas are selected. This step is repeated untill no more areas nearby are found. Note that it may result in redundancy, which is avoided with a nearest neighboor algorithm.
+### 2. Convolution:
+This step couple with __step__ 3 reduce the amount of iterations by extracting features, mainly high contrast with the surroundings, this features creates regions (R) that are deamed worth to be classified.
 
-<p align="center">
-  <img src="https://github.com/PedroFrias/amazonian_rainforest_survey/blob/main/imgs/Figure_2.png">
-</p>
+### 3. Clusttering:
+Each __R__ is composed for surveral points, by clusttering them its possible to get thier geometric center (X, Y).
+
+### 4. Classification:
+Select tiles from __I__ centered at __X__, __Y__ to feed through a Convolutional Neural Network (CNN).
+
+### 5. Propagation:
+If anything is found at 4 __R__ is reduced to a 3x3 version of itsef using MaxPooling (P), as __P__ is set to be the regions adjascent __I__.
+
+With this routine is possible to cover a large area with minimal data and labour.
+
 
 # How to run
  
@@ -37,12 +49,9 @@ Run the app:
 python main.py
 ```
 # Results
-A scatter plot with the location of the sites of deforestation found
+Marked as red are the sites of deforestation found at coordinates lat -3.227735 and lon -60.849749 (June, 15 2020). 
+The propagation is show in the footer.
 
 <p align="center">
-  <img src="https://github.com/PedroFrias/amazonian_rainforest_survey/blob/main/imgs/Figure_3.png">
+  <img src="https://github.com/PedroFrias/amazonian_rainforest_survey/blob/main/Figure_1.png">
 </p>
-
-lat, lon = -4.36391, -64.12855 Image take 06/13/2022 1:55 p.m.
-#
-Next update: refit the model to add precision.
