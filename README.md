@@ -44,5 +44,5 @@ Marked as red are the sites of deforestation found at coordinates lat -3.227735 
 The propagation is show in the footer.
 </p>
 <p align="center">
-  <img src="https://github.com/PedroFrias/amazonian_rainforest_survey/blob/main/Figure_1.png">
+  <img src="https://github.com/PedroFrias/amazonian_rainforest_survey/blob/main/images/results_so_far.png">
 </p>
