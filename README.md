@@ -37,7 +37,7 @@ Run the app:
 ```
 python main.py
 ```
-# Results
+# Results (so far...)
 
 <p align="justify">
 Marked as red are the sites of deforestation found at coordinates lat -3.227735 and lon -60.849749 (June, 15 2020). 
