@@ -43,6 +43,6 @@ python main.py
 Marked as red are the sites of deforestation found at coordinates lat -2.934369 and lon -59.478271 (June, 18 2020).
 </p>
 <p float="left">
-  <img src="https://github.com/PedroFrias/amazonian_rainforest_survey/blob/main/images/cnn_classifying_data.gif" width="500">
-  <img src="https://github.com/PedroFrias/amazonian_rainforest_survey/blob/main/images/classified_data.png" width="500">
+  <img src="https://github.com/PedroFrias/amazonian_rainforest_survey/blob/main/images/cnn_classifying_data.gif" width="400">
+  <img src="https://github.com/PedroFrias/amazonian_rainforest_survey/blob/main/images/classified_data.png" width="400">
 </p>
