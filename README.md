@@ -4,7 +4,7 @@
 ### How it works
 #### 1. Classification
 <p align="justify">
-Based on satelite imagens colected from googlemaps API, regions are selected for its content classification. Initally a satellite image (I) is requested from Google Maps' API. I have a twofold meaning: 1) feed a Convolutional Neural Network; 2) serves as a iterator, by convolving it to extract feature, the locations of this features are used to select tiles - with this aproach only the locations with meanginfull values are processed.
+ Initally a satellite image (I) is requested from Google Maps' API. I have a twofold meaning: 1) feed a Convolutional Neural Network; 2) serves as a iterator, by convolving it to extract feature, the locations of this features are used to select tiles - with this aproach only the locations with meanginfull values are processed.
   
 The workflow bellow shows the process:
 </p>
