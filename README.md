@@ -17,7 +17,7 @@ The workflow bellow shows the process:
 # How to run
 
 <p align="justify">
-First you'll need to get a [API key](https://console.cloud.google.com/apis). This service is paid, but you can get around 27000 imagens with the 200 credits provided by Google monthly. Obs.: these credits don't stack!
+First you'll need to get a API key, get one on https://console.cloud.google.com/apis. This service is paid, but you can get around 27000 imagens with the 200 credits provided by Google monthly. Obs.: these credits don't stack!
 </p>
 
 (The following instructions apply to Posix/bash. Windows users should check [here](https://docs.python.org/3/library/venv.html).)
