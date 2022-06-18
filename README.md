@@ -10,7 +10,7 @@ The workflow bellow shows the process:
 </p>
 
 <p align="center">
-  <img src="https://github.com/PedroFrias/amazonian_rainforest_survey/blob/main/images/cnn_deforestation_diagram.png">
+  <img src="https://github.com/PedroFrias/amazonian_rainforest_survey/blob/main/images/cnn_classification_diagram.png">
 </p>
 
 
