@@ -46,5 +46,5 @@ Graph 2.: Results and predictions.
 </p>
 <p float="left">
   <img src="https://github.com/PedroFrias/amazonian_rainforest_survey/blob/main/images/cnn_classifying_data.gif" width="400">
-  <img src="https://github.com/PedroFrias/amazonian_rainforest_survey/blob/main/images/results_predictions.png" width="400">
+  <img src="https://github.com/PedroFrias/amazonian_rainforest_survey/blob/main/images/results_and_predictions.png" width="400">
 </p>
