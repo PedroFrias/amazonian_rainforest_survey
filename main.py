@@ -8,245 +8,222 @@ import skimage.measure
 from random import randint
 import time
 import datetime
-from uuid import uuid1 as getID
-from PIL import Image
+from tqdm import tqdm
 
 # Local libs.:
-from maphandler import MapHandler
+from google_maps import GMaps
+from predictions import predictions_for_nearby_areas, remove_redundancy
+
 
 model = load_model("model/87_sites_of_deforestation_model.h5")
-maphandler = MapHandler()
+gmaps = GMaps()
 
+# globals
 CNN_INPUTS_DIM = 32
 GOOGLEMAPS_DIM = 512
 PADDING = 25
-TRESHOULD = 0.15 * (CNN_INPUTS_DIM ** 2)
-FIG = plt.figure()
+N = 10
+TRESHOULD = 0.05 * (CNN_INPUTS_DIM ** 2)
+FIG, (AX1, AX2) = plt.subplots(1, 2)
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# MAIN EXECUTION
+# ----------------------------------------------------------------------------------------------------------------------
 
 
 def main(lat, lon):
-    """
-    This function classifies the contents of a RGB image to look for sites of deforestation by first convolving it
-    to select areas called points of interest, which basically are regions with high contrats with the surroundings,
-    this phase outputs matrice(M) tronsformed into a scatter version for the next step.
+    # load data, variables, pre exections, etc.
 
-    The data is then clusttered, using KMeans with Davies Bouldin - for optimal number of clustters (C). If this method
-    return anything the tiles with center C is classified using a CNN.
+    # getting info. over the region to be classified
+    gmaps.set_variables(lat, lon, 15)
+    satellite_image = gmaps.get_map('satellite', to_rgb=False)
+    lower_boundary, upper_boundary = gmaps.get_bounds()
 
-        - With this aproach only the information that matter is feed trougth to the Neural Network.
+    # feature extraction (itarator)
+    satellite_image_as_array = np.array(satellite_image.convert('RGB')) / 255
+    AX1.imshow(satellite_image_as_array)
+    AX1.axis("off")
 
-    After predictting each tile the propagation is calculate, if needed, by simply reducing (MaxPooling)the sizes of the
-    convolution matrice (M) to P with size (3, 3), and P[1, 1] is the region been processed.
+    points_of_interest = [
+        satellite_image_as_array[:, :, 0] > 0.39215,
+        satellite_image_as_array[:, :, 0] > satellite_image_as_array[:, :, 1]
+    ]
+    points_of_interest = points_of_interest[0].astype(int) * points_of_interest[1].astype(int)
+    n_points = sum(points_of_interest.flatten())
 
-    Keywords:
-    - deforestation,
-    - convolution,
-    - clusttering,
-    - convolutional neural network,
-    - pooling.
+    # the main execution only takes place if 'points_of_interest' is above a treshould
+    if n_points > 0:
 
-    :param show_results:
-    :return:
-    """
-
-    # variable
-
-    # method
-    # atellite_image = Image.open('data/test.jpg')
-    satellite_image = maphandler.get_map('satellite', to_rgb=False)
-    region_bounds = maphandler.get_bounds()
-    satellite_image_as_array = np.array(satellite_image.convert('RGB')) / 25
-
-    # noise reduction
-    points_of_interest = satellite_image_as_array[:, :, 0] / satellite_image_as_array[:, :, 1]
-    points_of_interest = convolve(points_of_interest, np.ones((5, 5)) / 5 ** 2) > 0.7
-    points_of_interest = points_of_interest.astype(int)
-
-    if sum(points_of_interest.flatten()) > 0.1 * GOOGLEMAPS_DIM ** 2:
-
-        sites_of_deforestation = []
-        propagation = []
-        pol_x = np.polyfit([0, GOOGLEMAPS_DIM], [region_bounds[1][0], region_bounds[1][1]], 1)
-        pol_y = np.polyfit([GOOGLEMAPS_DIM, 0], [region_bounds[0][0], region_bounds[0][1]], 1)
+        sites_of_deforestation = list()
+        group = np.round(lat, 0) * 1000 + np.round(2)
+        pol_x = np.polyfit([0, GOOGLEMAPS_DIM], [lower_boundary[1], upper_boundary[1]], 1)
+        pol_y = np.polyfit([GOOGLEMAPS_DIM, 0], [lower_boundary[0], upper_boundary[0]], 1)
 
         # setting iterator up
         indexes_1D = np.arange(GOOGLEMAPS_DIM ** 2).flatten()
         indexes_2D = np.unravel_index(
             indexes_1D,
-            (GOOGLEMAPS_DIM,
-             GOOGLEMAPS_DIM)
+            (GOOGLEMAPS_DIM, GOOGLEMAPS_DIM)
         )
 
         dataframe = pd.DataFrame()
         dataframe['i'] = indexes_2D[0].astype(int)
         dataframe['j'] = indexes_2D[1].astype(int)
+
+        # lower the number of points to make it run faster without losing meaning.
         dataframe['Value on (i, j)'] = points_of_interest.flatten() * np.random.rand(GOOGLEMAPS_DIM ** 2)
 
-        timeout = 25.5
+        # fix a time limit for each iteration
+        timeout = 15.5
         timeout_start = time.time()
 
+        # main exectution (classification)
         while time.time() < timeout_start + timeout:
-            workbench = [
-                np.array(dataframe['Value on (i, j)']).reshape(
-                    (GOOGLEMAPS_DIM, GOOGLEMAPS_DIM)
-                ),
-                np.array(dataframe[dataframe['Value on (i, j)'] > 0.9])
-            ]
-
-            index = randint(0, len(workbench[1]))
 
             try:
+                site_of_deforestation = 0
+
+                interator = [
+                    np.array(dataframe['Value on (i, j)']).reshape(
+                        (GOOGLEMAPS_DIM, GOOGLEMAPS_DIM)
+                    ),
+                    np.array(dataframe[dataframe['Value on (i, j)'] > 0.9])
+                ]
+
+                # select a random-ish tile
+                index = randint(0, len(interator[1]) - 1)
+
                 i = np.clip(
-                    workbench[1][index][0],
+                    interator[1][index][0],
                     a_min=2,
                     a_max=GOOGLEMAPS_DIM - (CNN_INPUTS_DIM + 2)
                 ).astype(int)
 
                 j = np.clip(
-                    workbench[1][index][1],
+                    interator[1][index][1],
                     a_min=2,
                     a_max=GOOGLEMAPS_DIM - (CNN_INPUTS_DIM + 2)
                 ).astype(int)
 
+                # tile
                 input = satellite_image_as_array[
                     i:i + CNN_INPUTS_DIM,
                     j:j + CNN_INPUTS_DIM
                 ]
 
-                grid_filling = sum(points_of_interest[
-                                   i:i + CNN_INPUTS_DIM,
-                                   j:j + CNN_INPUTS_DIM
-                ].flatten())
+                # coverage to be tranformed into area
+                coverage = sum(
+                    points_of_interest[
+                        i:i + CNN_INPUTS_DIM,
+                        j:j + CNN_INPUTS_DIM
+                    ].flatten()
+                )
 
-                if grid_filling > TRESHOULD:
+                # the classification is done only if the tile have enougth coverage area
+                if coverage > TRESHOULD:
 
-                    classification = np.round(
+                    # run the inputs trougth a CNN
+                    site_of_deforestation = np.round(
                         model.predict(
                             x=np.expand_dims(input, 0),
                             verbose=0
-                        )
+                        ),
+                        2
                     )[0][0]
 
-                    if classification:
-                        # store coordinates
-                        coordinates = [np.polyval(pol_y, i), np.polyval(pol_x, j)]
+                    if site_of_deforestation > 0.75:
+
+                        # get to i, j index as coordinates
+                        lat = np.polyval(pol_y, i)
+                        lon = np.polyval(pol_x, j)
+
                         sites_of_deforestation.append([
                             datetime.date.today(),
-                            coordinates[0],
-                            coordinates[1],
-                            grid_filling,
+                            np.round(lat, 6),
+                            np.round(lon, 6),
+                            group,
+                            site_of_deforestation
                         ])
 
-                        # mark region to not be processed again
-                        i_range = (
-                            np.clip(i - 64, a_min=0, a_max=None),
-                            np.clip(i + 64, a_min=None, a_max=GOOGLEMAPS_DIM)
-                        )
-                        i_tile_size = abs(i_range[0] - i_range[1])
+                # update iterator to mark region to not be processed again
 
-                        j_range = (
-                            np.clip(j - 64, a_min=0, a_max=None),
-                            np.clip(j + 64, a_min=None, a_max=GOOGLEMAPS_DIM)
-                        )
-                        j_tile_size = abs(j_range[0] - j_range[1])
+                tile_size = int(CNN_INPUTS_DIM * (1 + site_of_deforestation))
 
-                        workbench[0][
-                            i_range[0]:i_range[1],
-                            j_range[0]:j_range[1]] += create_circular_mask(
-                                i_tile_size,
-                                j_tile_size,
-                                center=None,
-                                radius=None
-                        ) * (-1)
+                i_range = (
+                    np.clip(i - tile_size, a_min=0, a_max=None),
+                    np.clip(i + tile_size, a_min=None, a_max=GOOGLEMAPS_DIM)
+                )
+                i_tile_size = abs(i_range[0] - i_range[1])
 
-                        dataframe['Value on (i, j)'] = workbench[0].flatten()
+                j_range = (
+                    np.clip(j - tile_size, a_min=0, a_max=None),
+                    np.clip(j + tile_size, a_min=None, a_max=GOOGLEMAPS_DIM)
+                )
+                j_tile_size = abs(j_range[0] - j_range[1])
 
-                    else:
-                        workbench[0][
-                            i:i + CNN_INPUTS_DIM,
-                            j:j + CNN_INPUTS_DIM] += create_circular_mask(
-                                32,
-                                32,
-                                center=None,
-                                radius=None
-                        ) * (-1)
+                interator[0][i_range[0]:i_range[1], j_range[0]:j_range[1]] += create_circular_mask(
+                    i_tile_size,
+                    j_tile_size,
+                    center=None,
+                    radius=None
+                ) * (-1)
 
-                        dataframe['Value on (i, j)'] = workbench[0].flatten()
+                dataframe['Value on (i, j)'] = interator[0].flatten()
+                n_points = n_points - coverage
 
-                    plt.imshow(np.clip(workbench[0], a_min=-1, a_max=1), cmap="Blues")
-                    plt.axis("off")
-                    plt.pause(1)
+                AX2.imshow(np.clip(interator[0], a_min=-1, a_max=1) * (-1), cmap="Greys")
+                AX2.axis("off")
+                plt.pause(0.05)
 
-            except IndexError:
-                pass
+            except ValueError:
+                break
 
-        # Nearby areas
         if len(sites_of_deforestation) > 0:
 
-            SITES_OF_DEFORESTATIONS = pd.read_csv("data/sites_of_deforestation.csv")
-            PROPAGATION = pd.read_csv("data/propagation.csv")
-
             sites_of_deforestation = np.array(sites_of_deforestation)
-            region_bounds = maphandler.get_bounds()
 
-            neighbors = np.array([
-                np.linspace(region_bounds[0][0], region_bounds[0][1], 5)[1:4],
-                np.linspace(region_bounds[1][0], region_bounds[1][1], 5)[1:4]
-            ])
+            # store classiified data
+            dataframe = pd.read_csv("data/dataframe.csv")
 
-            neighbors = np.meshgrid(neighbors[0], neighbors[1])
-            neighbors = np.array([
-                neighbors[0].flatten(),
-                neighbors[1].flatten()
-            ]).transpose()
+            # predictions
+            predict = predictions_for_nearby_areas(gmaps, group, sites_of_deforestation)
 
-            for i, neighbor in enumerate(neighbors):
-                if i != 4:
-                    treshould = ((lat - neighbor[0]) ** 2 + (lon - neighbor[1]) ** 2) ** (1 / 2)
-
-                    dist = min([
-                        sum((site_of_deforestation[1:3] - neighbor) ** 2) ** (1 / 2)
-                        for site_of_deforestation in sites_of_deforestation
-                    ])
-
-                    if dist < treshould:
-                        propagation.append([neighbor[0], neighbor[1]])
-
-            propagation = np.array(propagation)
-
-            try:
-                sites_of_deforestation = pd.DataFrame({
-                    "ID": getID().hex,
-                    "Date": sites_of_deforestation[:, 0],
-                    "Lats": sites_of_deforestation[:, 1],
-                    "Lons": sites_of_deforestation[:, 2],
-                    "Area": sites_of_deforestation[:, 3],
+            # store predictions
+            if len(predict) > 0:
+                predict = np.array(predict)
+                predict = pd.DataFrame({
+                "Date": predict[:, 0],
+                "Lats": predict[:, 1],
+                "Lons": predict[:, 2],
+                "Group": predict[:, 3],
+                "Validation": predict[:, 4],
                 })
+                predict.reset_index(drop=True)
+                dataframe = pd.concat([dataframe, predict], axis=0)
 
-                sites_of_deforestation.reset_index(drop=True)
-                sites_of_deforestation = pd.concat([SITES_OF_DEFORESTATIONS, sites_of_deforestation], axis=0)
+            sites_of_deforestation = pd.DataFrame({
+                "Date": sites_of_deforestation[:, 0],
+                "Lats": sites_of_deforestation[:, 1],
+                "Lons": sites_of_deforestation[:, 2],
+                "Group": sites_of_deforestation[:, 3],
+                "Validation": sites_of_deforestation[:, 4],
+            })
+            sites_of_deforestation.reset_index(drop=True)
+            dataframe = pd.concat([dataframe, sites_of_deforestation], axis=0)
 
-                propagation = pd.DataFrame({
-                    "Lats": propagation[:, 0],
-                    "Lons": propagation[:, 1]
-                })
-                propagation.reset_index(drop=True)
-                propagation = pd.concat([PROPAGATION, propagation], axis=0)
+            dataframe.to_csv("data/dataframe.csv", index=False)
 
-                sites_of_deforestation.to_csv("data/sites_of_deforestation.csv", index=False)
-                propagation.to_csv("data/propagation.csv", index=False)
+    else:
+        """
+        print(f"region centered at ({lat}, {lon}), "
+              f"taken {datetime.date.today()} did not meet the criteria.")
+        """
+        pass
 
-            except TypeError:
-                pass
-
-        plt.close()
-
-
-"""
-----------------------------------------------------------------------------------------------------------------------
-
-----------------------------------------------------------------------------------------------------------------------
-"""
+# ----------------------------------------------------------------------------------------------------------------------
+# MAIN SUPPORTING FUNCTIONS
+# ----------------------------------------------------------------------------------------------------------------------
 
 
 def convolve(inputs, kernel):
@@ -273,10 +250,13 @@ def pooling(inputs, shape, function=np.mean):
 
 if __name__ == '__main__':
 
-    unclassified_data = pd.read_csv("data/unclassified_data.csv")
-    unclassified_data = unclassified_data.values.tolist()
+    dataframe = pd.read_csv("data/dataframe.csv")
+    dataframe = dataframe[dataframe['Validation'] == 0]
+    dataframe = dataframe.values.tolist()
+    n_data_points = len(dataframe)
 
-    for coordinate in unclassified_data:
-        lat, lon = coordinate[0], coordinate[1]
-        maphandler.set_variables(lat, lon, 15)
+    for i, data in enumerate(dataframe):
+        lat, lon = data[1], data[2]
         main(lat, lon)
+        remove_redundancy()
+
