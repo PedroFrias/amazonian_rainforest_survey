@@ -44,7 +44,7 @@ Graph 1.: CNN main execuution on lat -2.934369 and lon -59.478271 (June, 18 2020
  
 Graph 2.: Results(blue) and predictions(orange).
 </p>
-<p float="center">
-  <img src="https://github.com/PedroFrias/amazonian_rainforest_survey/blob/main/images/validation.gif" height="265">
+<p align="center">
+  <img src="https://github.com/PedroFrias/amazonian_rainforest_survey/blob/main/images/cnn_validation.gif" height="265">
   <img src="https://github.com/PedroFrias/amazonian_rainforest_survey/blob/main/images/results.png" height="265">
 </p>
