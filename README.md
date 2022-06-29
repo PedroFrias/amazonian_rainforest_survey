@@ -40,9 +40,9 @@ python main.py
 # Results (so far...)
 
 <p align="justify">
-Graph 1.: CNN main execuution on lat -2.934369 and lon -59.478271 (June, 18 2020).
+Graph 1.: CNN main execution on lat -2.934369 and lon -59.478271 (June, 18 2020).
  
-Graph 2.: Results(blue) and predictions(orange).
+Graph 2.: Results(white), predictions(purple-ish) and barriers(red).
 </p>
 <p align="center">
   <img src="https://github.com/PedroFrias/amazonian_rainforest_survey/blob/main/images/cnn_validation.gif" height="265">
