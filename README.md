@@ -5,13 +5,22 @@
 #### 1. Classification
 <p align="justify">
  Initally a satellite image (I) is requested from Google Maps' API. I have a twofold meaning: 1) feed a Convolutional Neural Network; 2) serves as a iterator, by convolving it to extract feature, the locations of this features are used to select tiles - with this aproach only the locations with meanginfull values are processed.
-  
+ 
 The workflow bellow shows the process:
 </p>
 
 <p align="center">
   <img src="https://github.com/PedroFrias/amazonian_rainforest_survey/blob/main/images/cnn_classification_diagram.png">
 </p>
+
+#### 2. Predictions
+ for each set of coordinates (lat, lon), if validated, a set predictions is made as follow f([lats], [lons], [val]) = P(lats, lons), where P are the regions surrounding lat, lon.
+ 
+ <p align="center">
+  <img src="https://github.com/PedroFrias/amazonian_rainforest_survey/blob/main/images/predictions.png">
+</p>
+
+The preditions of N (iteration) feeds N + 1.
 
 
 # How to run
